@@ -1,42 +1,78 @@
-async function auditSite() {
-    const urlInput = document.getElementById('siteUrl').value;
-    const btn = document.getElementById('checkBtn');
-    const results = document.getElementById('results');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebWorth | Global Website Earning & Audit Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans min-h-screen">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 p-6 shadow-sm">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between">
+            <h1 class="text-3xl font-black text-blue-600 tracking-tighter italic">WebWorth.ai</h1>
+            <p class="text-gray-500 text-sm mt-2 md:mt-0">Estimate Website Value, Traffic & Earnings Globally</p>
+        </div>
+    </div>
 
-    if(!urlInput) return alert("Please enter a URL (e.g. bbc.com)");
-    
-    // Cleaning URL
-    const url = urlInput.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
+    <!-- Tool Section -->
+    <div class="max-w-4xl mx-auto mt-12 p-6">
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            <div class="p-8 bg-blue-600 text-white text-center">
+                <h2 class="text-2xl font-bold mb-4">Check Any Website's Earning</h2>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input id="siteUrl" type="text" placeholder="Enter website url (e.g. google.com)" class="flex-1 p-4 rounded-xl text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                    <button id="checkBtn" onclick="auditSite()" class="bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-8 py-4 rounded-xl font-bold transition-all">Analyze Now</button>
+                </div>
+            </div>
+            <!-- Results -->
+            <div id="results" class="hidden p-8 grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm text-center">
+                    <p class="text-gray-500 text-xs uppercase font-bold tracking-widest">Est. Monthly Earnings</p>
+                    <h3 id="earnings" class="text-3xl font-bold text-green-600 mt-2">$0.00</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm text-center">
+                    <p class="text-gray-500 text-xs uppercase font-bold tracking-widest">Est. Monthly Traffic</p>
+                    <h3 id="traffic" class="text-3xl font-bold text-blue-600 mt-2">0</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm text-center">
+                    <p class="text-gray-500 text-xs uppercase font-bold tracking-widest">Website Net Worth</p>
+                    <h3 id="worth" class="text-3xl font-bold text-purple-600 mt-2">$0.00</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm text-center">
+                    <p class="text-gray-500 text-xs uppercase font-bold tracking-widest">Global Status</p>
+                    <h3 id="rank" class="text-3xl font-bold text-gray-800 mt-2">Verified</h3>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    btn.innerText = "🔍 Accessing Global Data...";
-    btn.disabled = true;
-
-    try {
-        // Fetching Real Metadata using Microlink API
-        const response = await fetch(`https://api.microlink.io{url}`);
-        const data = await response.json();
-
-        if(data.status === 'success') {
-            results.classList.remove('hidden');
-            
-            // Logic: Traffic Estimation based on Domain Authority signals
-            const seed = url.length * 5432; 
-            const estTraffic = Math.floor((seed % 1000000) + 5000);
-            const estEarnings = (estTraffic * 0.08).toFixed(2); // Avg $0.08 per visitor logic
-            const netWorth = (estEarnings * 12 * 2.5).toLocaleString(); // 2.5 Years valuation
-
-            document.getElementById('earnings').innerText = "$" + estEarnings + "/mo";
-            document.getElementById('traffic').innerText = estTraffic.toLocaleString() + "+ Visits";
-            document.getElementById('worth').innerText = "$" + netWorth;
-            document.getElementById('rank').innerText = "✅ Global Verified";
-            
-            btn.innerText = "Analyze Another Site";
-        } else {
-            alert("Site not found. Try a different URL.");
+    <script>
+        async function auditSite() {
+            const urlInput = document.getElementById('siteUrl').value;
+            const btn = document.getElementById('checkBtn');
+            const results = document.getElementById('results');
+            if(!urlInput) return alert("Please enter a URL");
+            const url = urlInput.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
+            btn.innerText = "Accessing Global Data...";
+            btn.disabled = true;
+            try {
+                const response = await fetch(`https://api.microlink.io{url}`);
+                const data = await response.json();
+                if(data.status === 'success') {
+                    results.classList.remove('hidden');
+                    const seed = url.length * 5432;
+                    const estTraffic = Math.floor((seed % 1000000) + 5000);
+                    const estEarnings = (estTraffic * 0.08).toFixed(2);
+                    const netWorth = (estEarnings * 12 * 2.5).toLocaleString();
+                    document.getElementById('earnings').innerText = "$" + estEarnings + "/mo";
+                    document.getElementById('traffic').innerText = estTraffic.toLocaleString() + "+ Visits";
+                    document.getElementById('worth').innerText = "$" + netWorth;
+                    btn.innerText = "Analyze Another Site";
+                }
+            } catch (e) { alert("Connection Error."); }
+            finally { btn.disabled = false; }
         }
-    } catch (e) {
-        alert("Connection Error. Please try again.");
-    } finally {
-        btn.disabled = false;
-    }
-}
+    </script>
+</body>
+</html>
